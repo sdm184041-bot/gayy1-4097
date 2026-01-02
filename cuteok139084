@@ -10023,7 +10023,7 @@ for _, part in ipairs(clone:GetDescendants()) do
     end
 end
 
-local abletodesync = false
+local abletodesync = true
 
 _G.Desync = {
     MinX = 10,
