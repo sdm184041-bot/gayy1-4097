@@ -10024,3 +10024,138 @@ for _, part in ipairs(clone:GetDescendants()) do
 end
 
 local abletodesync = false
+
+_G.Desync = {
+    MinX = 10,
+    MaxX = 10,
+    MinY = 10,
+    MaxY = 10,
+    MinZ = 10,
+    MaxZ = 10,
+    MinPitch = 0,
+    MaxPitch = 360,
+    MinYaw = 0,
+    MaxYaw = 360,
+
+}
+
+local invoid = false
+
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+
+    pcall(function()
+        if headshots.Desync.Enabled and headshots.Desync.Keybind and abletodesync then
+            if headshots.Desync.Spam == false then
+                SavedPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame
+                SpoofedPosition = nil
+        
+                if headshots.Desync.Mode == "Custom" then
+                    local randomPitch = math.rad(math.random(_G.Desync.MinPitch, _G.Desync.MaxPitch) - 180)
+                    local randomYaw = math.rad(math.random(_G.Desync.MinYaw, _G.Desync.MaxYaw) - 180)
+                    local rotation = CFrame.Angles(randomPitch, randomYaw, 0)
+                    SpoofedPosition = (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(math.random(-_G.Desync.MinX, _G.Desync.MaxX), math.random(-_G.Desync.MinY, _G.Desync.MaxY), math.random(-_G.Desync.MinZ, _G.Desync.MaxZ))) * rotation
+                elseif headshots.Desync.Mode == "Randomize" then
+                    SpoofedPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(math.random(-50, 50), math.random(0, 50), math.random(-50, 50))
+                elseif headshots.Desync.Mode == "Void" then
+                    SpoofedPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(math.random(-80000, 80000), math.random(0, 80000), math.random(-80000, 80000))
+                end
+        
+                game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = SpoofedPosition
+        
+                if headshots.Desync.Visualize then
+                    SetRigCollisionFalse(clone)
+                    SetRigTransparency(clone, headshots.Desync.Transparency)
+                    clone.HumanoidRootPart.CFrame = SpoofedPosition
+                else
+                    SetRigTransparency(clone, 1)
+                end
+        
+                game:GetService("RunService"):BindToRenderStep("RestoreCFrame", 199, function()
+                    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = SavedPosition
+                    game:GetService("RunService"):UnbindFromRenderStep("RestoreCFrame")
+                end)
+            elseif headshots.Desync.Spam == true then
+                if invoid == true then
+                    SavedPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame
+                    SpoofedPosition = nil
+            
+                    if headshots.Desync.Mode == "Custom" then
+                        local randomPitch = math.rad(math.random(_G.Desync.MinPitch, _G.Desync.MaxPitch) - 180)
+                        local randomYaw = math.rad(math.random(_G.Desync.MinYaw, _G.Desync.MaxYaw) - 180)
+                        local rotation = CFrame.Angles(randomPitch, randomYaw, 0)
+                        SpoofedPosition = (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(math.random(-_G.Desync.MinX, _G.Desync.MaxX), math.random(-_G.Desync.MinY, _G.Desync.MaxY), math.random(-_G.Desync.MinZ, _G.Desync.MaxZ))) * rotation
+                    elseif headshots.Desync.Mode == "Randomize" then
+                        SpoofedPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(math.random(-50, 50), math.random(0, 50), math.random(-50, 50))
+                    elseif headshots.Desync.Mode == "Void" then
+                        SpoofedPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(math.random(-80000, 80000), math.random(0, 80000), math.random(-80000, 80000))
+                    end
+            
+                    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = SpoofedPosition
+            
+                    if headshots.Desync.Visualize then
+                        SetRigCollisionFalse(clone)
+                        SetRigTransparency(clone, headshots.Desync.Transparency)
+                        clone.HumanoidRootPart.CFrame = SpoofedPosition
+                    else
+                        SetRigTransparency(clone, 1)
+                    end
+            
+                    game:GetService("RunService"):BindToRenderStep("RestoreCFrame", 199, function()
+                        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = SavedPosition
+                        game:GetService("RunService"):UnbindFromRenderStep("RestoreCFrame")
+                    end)
+                else
+                    SetRigTransparency(clone, 1)
+                end
+            end
+        else
+            SetRigTransparency(clone, 1)
+        end
+    end)
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+
+    SavedPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame
+
+    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(math.random(-50, 50), math.random(0, 50), math.random(-50, 50))
+        
+    game:GetService("RunService"):BindToRenderStep("RestoreCFrame", 199, function()
+        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = SavedPosition
+        game:GetService("RunService"):UnbindFromRenderStep("RestoreCFrame")
+    end)
+end)
+
+task.spawn(function()
+    while true do
+        invoid = true
+        task.wait(headshots.Desync.InVoid)
+        invoid = false
+        task.wait(headshots.Desync.OnGround)
+    end
+end)
+
+local function IsPlayerVisible(targetCharacter)
+    local head = targetCharacter:FindFirstChild("Head")
+    if not head then return false end
+
+    if head.Position.Y > 36 then
+        return false
+    end
+
+    local origin = workspace.CurrentCamera.CFrame.Position
+    local direction = (head.Position - origin)
+    
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    rayParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character}
+
+    local result = workspace:Raycast(origin, direction, rayParams)
+
+    if result then
+        return result.Instance:IsDescendantOf(targetCharacter)
+    else
+        return true
+    end
+end
+
